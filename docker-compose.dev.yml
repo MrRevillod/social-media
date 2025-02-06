@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: apps/auth/Dockerfile
     volumes:
-      - ./:/app
+      - ./:/chat
     ports:
       - "8000:8000"
     depends_on:
@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: apps/messenger/Dockerfile
     volumes:
-      - ./:/app
+      - ./:/chat
     ports:
       - "8001:8000"
     depends_on:

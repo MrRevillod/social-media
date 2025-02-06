@@ -4,5 +4,7 @@ fn main() {
     common::grettings();
     database::grettings();
 
+    println!("testing watch");
+
     println!("End of auth");
 }
