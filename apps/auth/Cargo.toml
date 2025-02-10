@@ -7,3 +7,4 @@ edition = "2021"
 axum = "0.8.1"
 common = { path = "../../libs/common" }
 database = { path = "../../libs/database" }
+tokio = { version = "1.43.0", features = ["full"] }

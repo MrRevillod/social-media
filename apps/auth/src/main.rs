@@ -1,10 +1,12 @@
-fn main() {
-    println!("Hello, world from auth, libs: ");
+use axum::Router;
+use tokio::net::TcpListener;
 
-    common::grettings();
-    database::grettings();
+#[tokio::main]
+async fn main() {
+    let listener = TcpListener::bind("0.0.0.0:8000").await.unwrap();
 
-    println!("testing watch");
+    let app = Router::new();
+    let db = database::init().await;
 
-    println!("End of auth");
+    axum::serve(listener, app).await.unwrap();
 }
