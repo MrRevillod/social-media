@@ -1,12 +1,13 @@
-version: "3.8"
-
 services:
   auth:
+    container_name: auth
     build:
       context: .
       dockerfile: apps/auth/Dockerfile
     volumes:
       - ./:/chat
+      - cargo_cache:/usr/local/cargo/registry
+      - auth_target:/chat/target
     ports:
       - "8000:8000"
     depends_on:
@@ -15,11 +16,14 @@ services:
       - .env
 
   messenger:
+    container_name: messenger
     build:
       context: .
       dockerfile: apps/messenger/Dockerfile
     volumes:
       - ./:/chat
+      - cargo_cache:/usr/local/cargo/registry
+      - messenger_target:/chat/target
     ports:
       - "8001:8000"
     depends_on:
@@ -27,7 +31,23 @@ services:
     env_file:
       - .env
 
+  diesel_cli:
+    container_name: diesel_cli
+    stdin_open: true
+    tty: true
+    build:
+      context: ./
+      dockerfile: libs/database/Dockerfile
+    volumes:
+      - ./libs/database:/diesel_cli
+      - cargo_cache:/usr/local/cargo/registry
+    depends_on:
+      - database
+    env_file:
+      - .env
+
   nginx:
+    container_name: nginx
     image: nginx:alpine
     volumes:
       - ./config/nginx.dev.conf:/etc/nginx/nginx.conf:ro
@@ -38,6 +58,7 @@ services:
       - messenger
 
   database:
+    container_name: pg_database
     image: postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -50,3 +71,6 @@ services:
 
 volumes:
   postgres_data:
+  auth_target:
+  messenger_target:
+  cargo_cache:
