@@ -1,8 +1,14 @@
 {
+    "workbench.editor.limit.enabled": true,
+    "workbench.editor.limit.value": 5,
+    "workbench.list.smoothScrolling": false,
+    "terminal.integrated.gpuAcceleration": "off",
+    "editor.smoothScrolling": false,
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
-        "**/node_modules/*/**": false
+        "**/node_modules/*/**": false,
+        "**/target/**": true,
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.exclude": {
@@ -15,7 +21,7 @@
         "**/node_modules": true,
         "**/build": true,
         "**/dist": true,
-        "**/migrations": true,
+        "**/migrations": false,
         ".markdown": true,
         "target": true,
     },
@@ -137,6 +143,9 @@
     "[svelte]": {
         "editor.defaultFormatter": "svelte.svelte-vscode"
     },
+    "[toml]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    },
     "errorLens.enabled": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
     "editor.formatOnSave": true,
@@ -150,4 +159,19 @@
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
+    "rust-analyzer.checkOnSave.command": "clippy",
+    "rust-analyzer.cargo.buildScripts.enable": false,
+    "rust-analyzer.procMacro.enable": false,
+    "rust-analyzer.cargo.features": "all",
+    "rust-analyzer.cargo.allFeatures": true,
+    "rust-analyzer.cargo.loadOutDirsFromCheck": false,
+    "rust-analyzer.diagnostics.enable": true,
+    "rust-analyzer.diagnostics.disabled": [
+        "inactive-code"
+    ],
+    "rust-analyzer.workspace.symbol.search.limit": 1000,
+    "rust-analyzer.files.watcher": "client",
+    "rust-analyzer.completion.autoimport.enable": true,
+    "rust-analyzer.memoryUsage.limit": 512,
+    "rust-analyzer.lru.capacity": 64
 }
