@@ -1,5 +1,5 @@
 pub mod models;
-pub mod schema;
+mod schema;
 
 use diesel_async::{AsyncConnection, AsyncPgConnection};
 use std::{env, sync::Arc};

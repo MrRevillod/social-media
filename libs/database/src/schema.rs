@@ -5,8 +5,8 @@ diesel::table! {
         id -> Uuid,
         user_id -> Uuid,
         token -> Text,
-        created_at -> Nullable<Timestamptz>,
-        updated_at -> Nullable<Timestamptz>,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
     }
 }
 
@@ -18,15 +18,12 @@ diesel::table! {
         #[max_length = 255]
         email -> Varchar,
         password -> Text,
-        validated -> Nullable<Bool>,
-        created_at -> Nullable<Timestamptz>,
-        updated_at -> Nullable<Timestamptz>,
+        validated -> Bool,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
     }
 }
 
 diesel::joinable!(sessions -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    sessions,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(sessions, users,);

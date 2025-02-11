@@ -157,14 +157,13 @@
     ],
     "svelte.enable-ts-plugin": true,
     "[rust]": {
-        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
     },
-    "rust-analyzer.checkOnSave.command": "clippy",
+    "rust-analyzer.server.path": "rust-analyzer",
+    "rust-analyzer.experimental.procAttrMacros": true,
     "rust-analyzer.cargo.buildScripts.enable": false,
     "rust-analyzer.procMacro.enable": false,
     "rust-analyzer.cargo.features": "all",
-    "rust-analyzer.cargo.allFeatures": true,
-    "rust-analyzer.cargo.loadOutDirsFromCheck": false,
     "rust-analyzer.diagnostics.enable": true,
     "rust-analyzer.diagnostics.disabled": [
         "inactive-code"

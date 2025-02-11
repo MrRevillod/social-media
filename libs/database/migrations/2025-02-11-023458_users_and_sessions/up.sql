@@ -5,7 +5,7 @@ create table users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password TEXT NOT NULL,
-    validated BOOLEAN DEFAULT FALSE
+    validated BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 create table sessions (
@@ -16,12 +16,12 @@ create table sessions (
 );
 
 ALTER TABLE users
-ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE;
+ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL;
 
 ALTER TABLE sessions
-ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE;
+ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL;
 
 SELECT diesel_manage_updated_at('users');
 SELECT diesel_manage_updated_at('sessions');
