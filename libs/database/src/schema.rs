@@ -5,6 +5,8 @@ diesel::table! {
         id -> Uuid,
         user_id -> Uuid,
         token -> Text,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
     }
 }
 
@@ -18,6 +20,7 @@ diesel::table! {
         password -> Text,
         validated -> Nullable<Bool>,
         created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
     }
 }
 

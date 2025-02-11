@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use database::models::User;
+use database::{models::User, DbConnectionRef};
 
 pub struct UserRepository {
-    pool: Arc<()>,
+    pool: Arc<DbConnectionRef>,
 }
 
 impl UserRepository {
-    pub fn new(pool: Arc<()>) -> Self {
+    pub fn new(pool: Arc<DbConnectionRef>) -> Self {
         UserRepository { pool }
     }
 
