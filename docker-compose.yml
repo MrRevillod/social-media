@@ -5,13 +5,14 @@ services:
       context: .
       dockerfile: apps/auth/Dockerfile
     volumes:
-      - ./:/chat
+      - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
-      - auth_target:/chat/target
+      - auth_target:/social-net/target
     ports:
       - "8000:8000"
     depends_on:
-      - database
+      prisma_cli:
+        condition: service_completed_successfully
     env_file:
       - .env
 
@@ -21,28 +22,29 @@ services:
       context: .
       dockerfile: apps/messenger/Dockerfile
     volumes:
-      - ./:/chat
+      - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
-      - messenger_target:/chat/target
+      - messenger_target:/social-net/target
     ports:
       - "8001:8000"
     depends_on:
-      - database
+      prisma_cli:
+        condition: service_completed_successfully
     env_file:
       - .env
 
-  diesel_cli:
-    container_name: diesel_cli
-    stdin_open: true
-    tty: true
+  prisma_cli:
+    container_name: prisma_cli
     build:
-      context: ./
-      dockerfile: libs/database/Dockerfile
+      context: .
+      dockerfile: libs/prisma_cli/Dockerfile
     volumes:
-      - ./libs/database:/diesel_cli
+      - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
+      - prisma_target:/social-net/target
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     env_file:
       - .env
 
@@ -68,9 +70,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${POSTGRES_USER} -d
+          ${POSTGRES_DB_NAME}'",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
   auth_target:
   messenger_target:
+  prisma_target:
   cargo_cache:

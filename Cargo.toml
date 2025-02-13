@@ -5,5 +5,5 @@ members = [
     "apps/auth", 
     "apps/messenger", 
     "libs/common", 
-    "libs/database"
+    "libs/prisma_cli"
 ]

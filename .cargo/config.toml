@@ -1,0 +1,4 @@
+[alias]
+prisma = "run -p prisma_cli --"
+prisma-generate = "prisma generate --schema=./libs/common/prisma/schema.prisma"
+prisma-migrate = "prisma migrate dev --schema=./libs/common/prisma/schema.prisma"
