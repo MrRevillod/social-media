@@ -10,7 +10,6 @@
         "**/node_modules/*/**": false,
         "**/target/**": true,
     },
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -76,6 +75,14 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true
     },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
     "[css]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true
@@ -91,7 +98,22 @@
         "editor.defaultFormatter": "svelte.svelte-vscode"
     },
     "[toml]": {
-        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        "editor.defaultFormatter": "tamasfe.even-better-toml"
+    },
+    "[dockercompose]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        }
+    },
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
     },
     "errorLens.enabled": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
@@ -103,11 +125,7 @@
         "typescript"
     ],
     "svelte.enable-ts-plugin": true,
-    "[rust]": {
-        "editor.defaultFormatter": "rust-lang.rust-analyzer",
-    },
     "rust-analyzer.server.path": "rust-analyzer",
-    "rust-analyzer.experimental.procAttrMacros": true,
     "rust-analyzer.cargo.buildScripts.enable": false,
     "rust-analyzer.procMacro.enable": false,
     "rust-analyzer.cargo.features": "all",
@@ -118,11 +136,20 @@
     "rust-analyzer.workspace.symbol.search.limit": 1000,
     "rust-analyzer.files.watcher": "client",
     "rust-analyzer.completion.autoimport.enable": true,
-    "rust-analyzer.memoryUsage.limit": 512,
     "rust-analyzer.lru.capacity": 64,
     "rust-analyzer.files.excludeDirs": [
-        "**/prisma.rs",
         ".git",
         "**/node_modules",
-    ]
+    ],
+    "path-autocomplete.excludedItems": {
+        "**/*.js": {
+            "when": "**/*.ts"
+        },
+        "**/*.map": {
+            "when": "**"
+        },
+        "**/{.git,node_modules}": {
+            "when": "**"
+        },
+    },
 }
