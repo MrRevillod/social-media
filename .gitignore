@@ -19,3 +19,7 @@ dist-ssr
 pnpm-lock.yaml
 
 .env
+
+**/prisma.rs
+**/migrations/**/
+**/migrations/**/*.sql
