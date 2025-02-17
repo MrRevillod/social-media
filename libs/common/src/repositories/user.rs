@@ -1,51 +1,41 @@
-use crate::database::postgre::{
-    self,
-    prisma::user::{self, Data, SetParam},
-};
-
 use prisma_client_rust::QueryError;
 
-#[warn(dead_code)]
-pub struct UserRepository {
-    client: postgre::DbConnectionRef,
-}
+use super::UserRepository;
+use crate::database::postgre::DbConnectionRef;
+use crate::prisma::user::{self, Data, SetParam, UniqueWhereParam};
 
 impl UserRepository {
-    pub fn new(client: postgre::DbConnectionRef) -> Self {
-        UserRepository { client }
+    pub async fn find_all(client: DbConnectionRef) -> Result<Vec<Data>, QueryError> {
+        Ok(client.user().find_many(vec![]).exec().await?)
     }
 
-    pub async fn find_all(&self) -> Result<Vec<Data>, QueryError> {
-        Ok(self.client.user().find_many(vec![]).exec().await?)
-    }
-
-    pub async fn find_one_by_id(&self, id: &String) -> Result<Option<Data>, QueryError> {
-        Ok(self
-            .client
-            .user()
-            .find_unique(user::id::equals(id.clone()))
-            .exec()
-            .await?)
+    pub async fn find_one(
+        client: &DbConnectionRef,
+        filter: UniqueWhereParam,
+    ) -> Result<Option<Data>, QueryError> {
+        Ok(client.user().find_unique(filter).exec().await?)
     }
 
     pub async fn create(
-        &self,
+        client: DbConnectionRef,
         name: String,
         email: String,
         password: String,
         validated: Option<bool>,
     ) -> Result<Data, QueryError> {
-        Ok(self
-            .client
+        Ok(client
             .user()
             .create(name, email, password, validated.unwrap_or(false), vec![])
             .exec()
             .await?)
     }
 
-    pub async fn update_one(&self, id: &String, fields: Vec<SetParam>) -> Result<Data, QueryError> {
-        Ok(self
-            .client
+    pub async fn update_one(
+        client: DbConnectionRef,
+        id: &String,
+        fields: Vec<SetParam>,
+    ) -> Result<Data, QueryError> {
+        Ok(client
             .user()
             .update(user::id::equals(id.clone()), fields)
             .exec()

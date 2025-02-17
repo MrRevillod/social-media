@@ -5,5 +5,5 @@ WORKDIR /social-net
 
 COPY . .
 
-CMD ["cargo", "prisma-migrate"]
-ENTRYPOINT ["cargo", "prisma-generate"]
+CMD ["sh", "-c", "cargo prisma-migrate ; cargo prisma-generate"]
+ENTRYPOINT ["./libs/prisma_cli/path_fix.sh"]

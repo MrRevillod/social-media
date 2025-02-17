@@ -127,12 +127,9 @@
     "svelte.enable-ts-plugin": true,
     "rust-analyzer.server.path": "rust-analyzer",
     "rust-analyzer.cargo.buildScripts.enable": false,
-    "rust-analyzer.procMacro.enable": false,
+    "rust-analyzer.procMacro.enable": true,
     "rust-analyzer.cargo.features": "all",
     "rust-analyzer.diagnostics.enable": true,
-    "rust-analyzer.diagnostics.disabled": [
-        "inactive-code",
-    ],
     "rust-analyzer.workspace.symbol.search.limit": 1000,
     "rust-analyzer.files.watcher": "client",
     "rust-analyzer.completion.autoimport.enable": true,
@@ -140,6 +137,10 @@
     "rust-analyzer.files.excludeDirs": [
         ".git",
         "**/node_modules",
+        "libs/common/src/prisma"
+    ],
+    "rust-analyzer.diagnostics.ignoredFiles": [
+        "**/prisma.rs"
     ],
     "path-autocomplete.excludedItems": {
         "**/*.js": {
