@@ -3,50 +3,58 @@ services:
     container_name: auth
     build:
       context: .
-      dockerfile: apps/auth/Dockerfile
+      dockerfile: ./apps/auth/Dockerfile
     volumes:
       - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
       - auth_target:/social-net/target
     ports:
       - "8000:8000"
-    depends_on:
-      prisma_cli:
-        condition: service_completed_successfully
     env_file:
       - .env
+    networks:
+      - my_networks
 
   messenger:
     container_name: messenger
     build:
       context: .
-      dockerfile: apps/messenger/Dockerfile
+      dockerfile: ./apps/messenger/Dockerfile
     volumes:
       - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
       - messenger_target:/social-net/target
     ports:
       - "8001:8000"
-    depends_on:
-      prisma_cli:
-        condition: service_completed_successfully
     env_file:
       - .env
+    networks:
+      - my_networks
 
-  prisma_cli:
-    container_name: prisma_cli
+  sqlx_cli:
+    container_name: sqlx_cli
+    restart: "no"
     build:
       context: .
-      dockerfile: libs/prisma_cli/Dockerfile
+      dockerfile: ./libs/sqlx/Dockerfile
     volumes:
       - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
-      - prisma_target:/social-net/target
+      - sqlx_cli_target:/social-net/target
     depends_on:
-      database:
+      postgres:
         condition: service_healthy
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=${POSTGRES_DATABASE_URL}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sqlx database create &&
+        sqlx migrate run --source /social-net/libs/sqlx/migrations
+    networks:
+      - my_networks
 
   nginx:
     container_name: nginx
@@ -58,9 +66,11 @@ services:
     depends_on:
       - auth
       - messenger
+    networks:
+      - my_networks
 
-  database:
-    container_name: pg_database
+  postgres:
+    container_name: postgres
     image: postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -82,10 +92,16 @@ services:
       start_period: 10s
     env_file:
       - .env
+    networks:
+      - my_networks
+
+networks:
+  my_networks:
+    driver: bridge
 
 volumes:
   postgres_data:
   auth_target:
   messenger_target:
-  prisma_target:
   cargo_cache:
+  sqlx_cli_target:

@@ -1,18 +1,27 @@
 use axum::routing::Router;
-use common::{database::postgre::init_prisma_client, services::state::AppState};
+use common::{database::postgres::get_db_connection, services::state::AppState};
+use tower_cookies::CookieManagerLayer;
 
 mod session;
+mod users;
 
 #[tokio::main]
 async fn main() {
-    let prisma_client = init_prisma_client().await;
-    let app_state = AppState::new(prisma_client);
+    common::check_env_vars();
 
+    let database = get_db_connection().await;
+    let app_state = AppState::new(database.clone());
+
+    let users_router = users::router::users_router(app_state.clone());
     let session_router = session::router::session_router(app_state.clone());
 
+    let cookie_layer = CookieManagerLayer::new();
+
     let app = Router::new()
-        .nest("/session", session_router)
-        .with_state(app_state);
+        .merge(session_router)
+        .merge(users_router)
+        .with_state(app_state)
+        .layer(cookie_layer);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
 

@@ -1,4 +1,4 @@
 [workspace]
 
 resolver = "2"
-members = ["apps/auth", "apps/messenger", "libs/common", "libs/prisma_cli"]
+members = ["apps/auth", "apps/messenger", "libs/common"]

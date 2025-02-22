@@ -3,7 +3,7 @@ use validator::Validate;
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct LoginRequest {
-    #[validate(email)]
+    #[validate(length(min = 1))]
     pub email: String,
     pub password: String,
 }

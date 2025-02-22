@@ -1,0 +1,6 @@
+-- Add migration script here
+
+ALTER TABLE users ALTER COLUMN validated SET DEFAULT false;
+ALTER TABLE users ALTER COLUMN updated_at SET DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE sessions ALTER COLUMN updated_at SET DEFAULT CURRENT_TIMESTAMP;

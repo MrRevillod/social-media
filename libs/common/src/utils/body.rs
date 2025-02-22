@@ -1,7 +1,5 @@
 use axum::{
     extract::{FromRequest, Request},
-    http::StatusCode,
-    response::{IntoResponse, Response},
     Json,
 };
 
@@ -9,7 +7,12 @@ use axum::{
 // let req = Request::from_parts(parts, body);
 
 use serde_json::json;
-use validator::Validate;
+use validator::{Validate, ValidationErrors};
+
+use crate::{
+    http::{codes::BAD_REQUEST, HttpResponse},
+    response,
+};
 
 pub struct JsonValidator<T>(pub T);
 
@@ -19,25 +22,21 @@ where
     S: Send + Sync,
     Json<T>: FromRequest<S>,
 {
-    type Rejection = Response;
+    type Rejection = HttpResponse;
 
-    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request, state: &S) -> Result<Self, HttpResponse> {
         let Json(data) = Json::<T>::from_request(req, state).await.map_err(|_| {
-            (
-                StatusCode::BAD_REQUEST,
-                Json(json!({ "error": "Invalid JSON body" })),
-            )
-                .into_response()
+            response!(BAD_REQUEST, json!({ "error": "Invalid JSON body" })).unwrap_err()
         })?;
 
-        data.validate().map_err(|e| {
-            (
-                StatusCode::BAD_REQUEST,
-                Json(json!({ "error": e.to_string() })),
-            )
-                .into_response()
-        })?;
+        data.validate()?;
 
         Ok(JsonValidator(data))
+    }
+}
+
+impl From<ValidationErrors> for HttpResponse {
+    fn from(errors: ValidationErrors) -> Self {
+        HttpResponse::BadRequest(json!({ "error": errors }))
     }
 }

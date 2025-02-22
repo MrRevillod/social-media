@@ -1,22 +1,14 @@
 use std::sync::Arc;
 
-pub mod postgre {
+pub mod postgres {
 
     use sqlx::{PgPool, Pool, Postgres};
 
     use super::*;
-    use crate::{constants::POSTGRES_DATABASE_URL, prisma::PrismaClient};
+    use crate::constants::POSTGRES_DATABASE_URL;
 
-    pub type DbConnectionRef = Arc<PrismaClient>;
-
-    pub async fn init_prisma_client() -> DbConnectionRef {
-        let client = PrismaClient::_builder()
-            .build()
-            .await
-            .unwrap_or_else(|err| panic!("Failed to connect to database: {}", err));
-
-        Arc::new(client)
-    }
+    pub type PostgresPool = Pool<Postgres>;
+    pub type PgPoolRef = Arc<PostgresPool>;
 
     pub async fn get_db_connection() -> Arc<Pool<Postgres>> {
         let pool = PgPool::connect(&POSTGRES_DATABASE_URL)
@@ -27,6 +19,10 @@ pub mod postgre {
 
         Arc::new(pool)
     }
+
+    // pub trait PostgreSave<T> {
+    //     async fn save(&self, pool: PgPoolRef) -> Result<T, sqlx::Error>;
+    // }
 }
 
 pub mod mongodb {}
