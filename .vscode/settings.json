@@ -4,11 +4,22 @@
     "workbench.list.smoothScrolling": false,
     "terminal.integrated.gpuAcceleration": "off",
     "editor.smoothScrolling": false,
+    "editor.indentSize": "tabSize",
+    "editor.tabSize": 4,
+    "typescript.suggest.paths": true,
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
         "**/node_modules/*/**": false,
         "**/target/**": true,
+        "**/routeTree.gen.ts": true
+    },
+    "files.readonlyInclude": {
+        "**/routeTree.gen.ts": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/routeTree.gen.ts": true
     },
     "files.exclude": {
         "**/.git": true,
@@ -63,9 +74,6 @@
         "*.tsx": "$(capture).ts, $(capture).*.tsx, $(capture)_*.ts, $(capture)_*.tsx, $(capture).less, $(capture).module.less, $(capture).module.less.d.ts, $(capture).scss, $(capture).module.scss, $(capture).module.scss.d.ts, $(capture).css.ts",
     },
     "typescript.validate.enable": true,
-    "search.exclude": {
-        "**/node_modules": true
-    },
     "typescript.tsdk": "node_modules/typescript/lib",
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -134,14 +142,6 @@
     "rust-analyzer.files.watcher": "client",
     "rust-analyzer.completion.autoimport.enable": true,
     "rust-analyzer.lru.capacity": 64,
-    "rust-analyzer.files.excludeDirs": [
-        ".git",
-        "**/node_modules",
-        "libs/common/src/prisma"
-    ],
-    "rust-analyzer.diagnostics.ignoredFiles": [
-        "**/prisma.rs"
-    ],
     "path-autocomplete.excludedItems": {
         "**/*.js": {
             "when": "**/*.ts"

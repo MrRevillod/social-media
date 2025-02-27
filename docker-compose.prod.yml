@@ -1,0 +1,34 @@
+services:
+  web-prod:
+    container_name: web-prod
+    build:
+      context: .
+      dockerfile: ./Dockerfile.web
+      target: prod-nginx
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    networks:
+      - my_networks
+    profiles:
+      - prod
+
+  nginx-prod:
+    container_name: nginx-prod
+    image: nginx:alpine
+    volumes:
+      - ./config/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - auth
+      - messenger
+      - web-prod
+    networks:
+      - my_networks
+    profiles:
+      - prod
+
+extends:
+  file: docker-compose.base.yml

@@ -1,0 +1,67 @@
+services:
+  auth:
+    container_name: auth
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+    volumes:
+      - ./:/social-net
+      - cargo_cache:/usr/local/cargo/registry
+      - auth_target:/social-net/target
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    networks:
+      - my_networks
+
+  postgres:
+    container_name: postgres
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${POSTGRES_USER} -d
+          ${POSTGRES_DB_NAME}'",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    env_file:
+      - .env
+    networks:
+      - my_networks
+
+  sqlx_cli:
+    container_name: sqlx_cli
+    restart: "no"
+    build:
+      context: .
+      dockerfile: ./libs/sqlx/Dockerfile
+    volumes:
+      - ./:/social-net
+      - cargo_cache:/usr/local/cargo/registry
+      - sqlx_cli_target:/social-net/target
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${POSTGRES_DATABASE_URL}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sqlx database create &&
+        sqlx migrate run --source /social-net/libs/sqlx/migrations
+    networks:
+      - my_networks
