@@ -16,11 +16,11 @@ use crate::constants::JWT_SECRET;
 pub struct Claims {
     pub user_id: String,
     pub session_id: String,
-    pub exp: u64,
+    pub exp: i64,
 }
 
 impl Claims {
-    pub fn new(user_id: String, session_id: String, exp: u64) -> Self {
+    pub fn new(user_id: String, session_id: String, exp: i64) -> Self {
         Self {
             user_id,
             session_id,

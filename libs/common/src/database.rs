@@ -1,16 +1,15 @@
+use crate::constants::POSTGRES_DATABASE_URL;
+
+use sqlx::{PgPool, Pool, Postgres};
 use std::sync::Arc;
 
-pub mod postgres {
+pub type PostgresPool = Pool<Postgres>;
+pub type PgPoolRef = Arc<PostgresPool>;
 
-    use sqlx::{PgPool, Pool, Postgres};
+pub struct PostgresClient;
 
-    use super::*;
-    use crate::constants::POSTGRES_DATABASE_URL;
-
-    pub type PostgresPool = Pool<Postgres>;
-    pub type PgPoolRef = Arc<PostgresPool>;
-
-    pub async fn get_db_connection() -> Arc<Pool<Postgres>> {
+impl PostgresClient {
+    pub async fn new() -> PgPoolRef {
         let pool = PgPool::connect(&POSTGRES_DATABASE_URL)
             .await
             .unwrap_or_else(|err| {
@@ -19,10 +18,4 @@ pub mod postgres {
 
         Arc::new(pool)
     }
-
-    // pub trait PostgreSave<T> {
-    //     async fn save(&self, pool: PgPoolRef) -> Result<T, sqlx::Error>;
-    // }
 }
-
-pub mod mongodb {}

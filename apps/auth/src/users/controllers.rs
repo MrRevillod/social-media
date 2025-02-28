@@ -19,9 +19,12 @@ pub async fn create(
         return response!(CONFLICT, json!({ "conflicts": vec!["email"] }));
     }
 
+    dbg!(&body);
+    dbg!(&user);
+
     UserRepository::create(
         &ctx.prisma,
-        body.name.clone(),
+        body.username.clone(),
         body.email.clone(),
         bcrypt::hash(&body.password, 10)?,
     )

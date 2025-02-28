@@ -29,7 +29,11 @@ where
             response!(BAD_REQUEST, json!({ "error": "Invalid JSON body" })).unwrap_err()
         })?;
 
+        println!("Validating...");
+
         data.validate()?;
+
+        println!("Validated...");
 
         Ok(JsonValidator(data))
     }

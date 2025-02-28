@@ -5,8 +5,8 @@ use common::regex;
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct RegisterRequest {
-    #[validate(length(min = 3, max = 100))]
-    pub name: String,
+    #[validate(length(min = 3, max = 50))]
+    pub username: String,
     #[validate(email)]
     pub email: String,
     #[validate(
@@ -18,19 +18,20 @@ pub struct RegisterRequest {
         must_match(other = "password", message = "Passwords must match"),
         custom(function = "password_schema", message = "Invalid password format")
     )]
+    #[serde(rename = "confirmPassword")]
     pub confirm_password: String,
 }
 
 fn password_schema(password: &str) -> Result<(), ValidationError> {
-    if password.len() < 8 {
+    if password.len() < 8 || password.len() > 100 {
         return Err(ValidationError::new(
-            "Password must be at least 8 characters long",
+            "Password must be at least 8 characters long and at most 100 characters long",
         ));
     }
 
+    let mut has_digit = false;
     let mut has_uppercase = false;
     let mut has_lowercase = false;
-    let mut has_digit = false;
 
     for c in password.chars() {
         match c {

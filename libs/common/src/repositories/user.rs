@@ -1,5 +1,7 @@
-use crate::{database::postgres::PgPoolRef, models::User};
+use crate::{database::PgPoolRef, models::User};
+
 use sqlx::{Error as SqlxError, QueryBuilder};
+use uuid::Uuid;
 
 pub struct UserRepository;
 
@@ -12,7 +14,7 @@ impl UserRepository {
         Ok(users)
     }
 
-    pub async fn find_by_id(pool: &PgPoolRef, id: &String) -> Result<Option<User>, SqlxError> {
+    pub async fn find_by_id(pool: &PgPoolRef, id: Uuid) -> Result<Option<User>, SqlxError> {
         let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
             .bind(id)
             .fetch_optional(pool.as_ref())
@@ -58,14 +60,14 @@ impl UserRepository {
 
     pub async fn create(
         pool: &PgPoolRef,
-        name: String,
+        username: String,
         email: String,
         password: String,
     ) -> Result<User, SqlxError> {
         let user = sqlx::query_as::<_, User>(
-            "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
+            "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *",
         )
-        .bind(name)
+        .bind(username)
         .bind(email)
         .bind(password)
         .fetch_one(pool.as_ref())
@@ -73,8 +75,4 @@ impl UserRepository {
 
         Ok(user)
     }
-
-    // pub async fn update_one(pool: PgPoolRef, id: &String) -> Result<(), SqlxError> {
-    //     Ok(())
-    // }
 }

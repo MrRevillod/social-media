@@ -1,11 +1,15 @@
 use axum::{
     extract::rejection::JsonRejection,
-    http::StatusCode,
+    http::{
+        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, ORIGIN},
+        HeaderName, Method, StatusCode,
+    },
     response::{IntoResponse, Response},
 };
 
 use bcrypt::BcryptError;
 use jsonwebtoken::errors::Error as JwtError;
+use lazy_static::lazy_static;
 use serde_json::{json, Value};
 
 #[macro_export]
@@ -85,7 +89,9 @@ impl From<JwtError> for HttpResponse {
 }
 
 impl From<sqlx::Error> for HttpResponse {
-    fn from(_: sqlx::Error) -> HttpResponse {
+    fn from(e: sqlx::Error) -> HttpResponse {
+        dbg!(&e);
+
         HttpResponse::INTERNAL_SERVER_ERROR
     }
 }
@@ -111,4 +117,16 @@ pub mod codes {
     pub const NOT_FOUND: u16 = 404;
     pub const CONFLICT: u16 = 409;
     pub const INTERNAL_SERVER_ERROR: u16 = 500;
+}
+
+lazy_static! {
+    pub static ref ALLOWED_HTTP_HEADERS: Vec<HeaderName> =
+        vec![ORIGIN, AUTHORIZATION, ACCEPT, CONTENT_TYPE];
+    pub static ref ALLOWED_HTTP_METHODS: Vec<Method> = vec![
+        Method::GET,
+        Method::POST,
+        Method::PATCH,
+        Method::PUT,
+        Method::DELETE,
+    ];
 }

@@ -19,6 +19,9 @@ pub mod constants {
             get_env_var("ACCESS_SESSION_EXP").parse::<i64>().unwrap();
         pub static ref REFRESH_SESSION_EXP: i64 =
             get_env_var("REFRESH_SESSION_EXP").parse::<i64>().unwrap();
+        pub static ref BASE_SERVER_URL: String = get_env_var("BASE_SERVER_URL");
+        pub static ref ENVIRONMENT: String = get_env_var("ENVIRONMENT");
+        pub static ref COOKIE_DOMAIN: String = get_env_var("COOKIE_DOMAIN");
     }
 }
 
@@ -27,10 +30,13 @@ pub fn get_env_var(key: &str) -> String {
 }
 
 pub fn check_env_vars() -> () {
-    let _ = constants::JWT_SECRET.to_string();
-    let _ = constants::POSTGRES_DATABASE_URL.to_string();
-    let _ = constants::ACCESS_SESSION_EXP.to_string();
-    let _ = constants::REFRESH_SESSION_EXP.to_string();
+    let _ = constants::JWT_SECRET;
+    let _ = constants::POSTGRES_DATABASE_URL;
+    let _ = constants::ACCESS_SESSION_EXP;
+    let _ = constants::REFRESH_SESSION_EXP;
+    let _ = constants::BASE_SERVER_URL;
+    let _ = constants::ENVIRONMENT;
+    let _ = constants::COOKIE_DOMAIN;
 }
 
 pub mod regex {

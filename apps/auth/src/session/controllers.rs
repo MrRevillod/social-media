@@ -47,7 +47,7 @@ pub async fn login(
     let session_exps = AuthService::get_exp_times();
 
     let access_payload = Claims::new(user_id.clone(), session_id.clone(), session_exps.access);
-    let refresh_payload = Claims::new(user_id, session_id, session_exps.refresh);
+    let refresh_payload = Claims::new(user_id, session_id.clone(), session_exps.refresh);
 
     let tokens = vec![
         jwt::sign(access_payload, None)?,
@@ -66,6 +66,7 @@ pub async fn login(
 
     SessionRepository::create(
         &ctx.prisma,
+        &session_id,
         tokens[1].clone(),
         user.id,
         client_ip_address.clone(),
@@ -81,11 +82,11 @@ pub async fn login(
 
 pub async fn logout(
     State(ctx): State<AppStateRef>,
-    Extension(payload): Extension<Claims>,
-    mut cookies: Cookies,
+    Extension(session_id): Extension<Uuid>,
+    cookies: Cookies,
 ) -> AxumResponse {
-    SessionRepository::desactivate(&ctx.prisma, payload.session_id).await?;
-    AuthService::remove_session_cookies(&mut cookies);
+    SessionRepository::desactivate(&ctx.prisma, session_id).await?;
+    AuthService::remove_session_cookies(&cookies);
 
     response!(OK, json!({ "message": "Logged out" }))
 }

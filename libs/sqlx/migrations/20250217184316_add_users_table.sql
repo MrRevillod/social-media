@@ -2,7 +2,7 @@
 
 CREATE TABLE "users" (
     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "name" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
     "email" TEXT UNIQUE NOT NULL,
     "password" TEXT NOT NULL,
     "validated" BOOLEAN NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE "users" (
 );
 
 CREATE TABLE "sessions" (
-    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "id" UUID PRIMARY KEY,
     "user_id" UUID NOT NULL,
     "token" TEXT UNIQUE NOT NULL,
     "created_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
