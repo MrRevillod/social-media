@@ -10,8 +10,16 @@ services:
       - auth_target:/social-net/target
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    networks:
+      - my_networks
+
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    volumes:
+      - ./apps/web:/social-net
     networks:
       - my_networks
 
@@ -36,8 +44,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    env_file:
-      - .env
     networks:
       - my_networks
 
@@ -54,8 +60,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    env_file:
-      - .env
     environment:
       - DATABASE_URL=${POSTGRES_DATABASE_URL}
     entrypoint: ["/bin/sh", "-c"]

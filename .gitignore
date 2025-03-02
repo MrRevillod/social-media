@@ -18,3 +18,4 @@ dist-ssr
 pnpm-lock.yaml
 
 .env
+.env.test

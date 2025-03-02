@@ -32,7 +32,7 @@
         "**/build": true,
         "**/dist": true,
         "**/migrations": false,
-        ".markdown": true,
+        ".markdown": false,
         "target": true,
     },
     "explorer.fileNesting.enabled": true,

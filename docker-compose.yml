@@ -1,46 +1,52 @@
 services:
-  web:
-    container_name: web
-    build:
-      context: .
-      dockerfile: ./apps/web/Dockerfile
-      target: dev
-    volumes:
-      - ./apps/web:/social-net
-    ports:
-      - "5173:5173"
-    env_file:
-      - .env
-    networks:
-      - my_networks
-
   nginx:
     container_name: nginx
     image: nginx:alpine
     volumes:
       - ./config/nginx.dev.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "8080:80"
+      - "80:80"
     depends_on:
       - auth
       - web
     networks:
       - my_networks
 
+  web:
+    extends:
+      file: docker-compose.base.yml
+      service: web
+    env_file:
+      - .env
+    build:
+      target: dev
+    networks:
+      - my_networks
+    ports:
+      - "5173:5173"
+
   auth:
     extends:
       file: docker-compose.base.yml
       service: auth
+    env_file:
+      - .env
+    build:
+      target: dev
 
   postgres:
     extends:
       file: docker-compose.base.yml
       service: postgres
+    env_file:
+      - .env
 
   sqlx_cli:
     extends:
       file: docker-compose.base.yml
       service: sqlx_cli
+    env_file:
+      - .env
 
 networks:
   my_networks:
