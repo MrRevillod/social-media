@@ -1,27 +1,24 @@
+use std::ops::Index;
+
 use axum::{
     extract::{Request, State},
     middleware::Next,
     response::Response,
 };
 
-use tower_cookies::{
-    cookie::{time::OffsetDateTime, SameSite},
-    Cookie, Cookies,
-};
-
 use chrono::{Duration as ChronoDuration, Utc};
-use uuid::Uuid;
+use tower_cookies::Cookies;
 
 use crate::{
-    constants::{ACCESS_SESSION_EXP, COOKIE_DOMAIN, ENVIRONMENT, REFRESH_SESSION_EXP},
-    http::HttpResponse,
+    constants::{ACCESS_SESSION_EXP, REFRESH_SESSION_EXP},
     models::User,
     repositories::{session::SessionRepository, user::UserRepository},
+    utils::{cookies::ServerCookie, response::HttpResponse, uuid},
 };
 
 use super::{
     jwt::{self, Claims},
-    state::AppStateRef,
+    state::AppState,
 };
 
 #[derive(Debug)]
@@ -34,8 +31,8 @@ pub struct AuthService {}
 
 impl AuthService {
     pub async fn authenticate(
+        State(ctx): State<AppState>,
         cookies: Cookies,
-        State(ctx): State<AppStateRef>,
         mut req: Request,
         next: Next,
     ) -> Result<Response, HttpResponse> {
@@ -45,8 +42,8 @@ impl AuthService {
 
         let claims = jwt::verify(&cookie.value().to_string(), None)?;
 
-        let user_id = Uuid::parse_str(&claims.user_id)?;
-        let session_id = Uuid::parse_str(&claims.session_id)?;
+        let user_id = uuid::parse_str(&claims.user_id)?;
+        let session_id = uuid::parse_str(&claims.session_id)?;
 
         let session = SessionRepository::find_by_id(&ctx.prisma, session_id).await?;
 
@@ -60,7 +57,7 @@ impl AuthService {
 
         req.extensions_mut().insert::<User>(user);
         req.extensions_mut().insert::<Claims>(claims);
-        req.extensions_mut().insert::<Uuid>(session_id);
+        req.extensions_mut().insert::<uuid::Uuid>(session_id);
 
         Ok(next.run(req).await)
     }
@@ -76,54 +73,17 @@ impl AuthService {
         }
     }
 
-    pub fn add_session_cookies(cookies: &mut Cookies, tokens: Vec<String>, exps: ExpirationTimes) {
-        let mut access = Cookie::new("ACCESS", tokens[0].clone());
-        let exp = OffsetDateTime::from_unix_timestamp(exps.access).unwrap();
-
-        access.set_http_only(true);
-        access.set_path("/");
-        access.set_expires(exp);
-        access.set_same_site(Some(SameSite::Lax));
-        access.set_secure(*ENVIRONMENT == "production");
-        access.set_domain(COOKIE_DOMAIN.as_str());
-
-        let mut refresh = Cookie::new("REFRESH", tokens[1].clone());
-        let exp = OffsetDateTime::from_unix_timestamp(exps.refresh).unwrap();
-
-        refresh.set_http_only(true);
-        refresh.set_path("/");
-        refresh.set_expires(exp);
-        refresh.set_same_site(Some(SameSite::Lax));
-        refresh.set_secure(*ENVIRONMENT == "production");
-        refresh.set_domain(COOKIE_DOMAIN.as_str());
-
-        cookies.add(access);
-        cookies.add(refresh);
+    pub fn add_session_cookies(cookies: &Cookies, tokens: Vec<String>, exps: ExpirationTimes) {
+        cookies.add(ServerCookie::new("ACCESS", &tokens.index(0), exps.access));
+        cookies.add(ServerCookie::new("REFRESH", &tokens.index(1), exps.refresh));
     }
 
     pub fn remove_session_cookies(cookies: &Cookies) {
-        let mut access = Cookie::new("ACCESS", "");
+        cookies.remove(ServerCookie::new("ACCESS", "", 0));
+        cookies.remove(ServerCookie::new("REFRESH", "", 0));
+    }
 
-        access.set_http_only(true);
-        access.set_path("/");
-        access.set_expires(OffsetDateTime::UNIX_EPOCH);
-        access.set_same_site(Some(SameSite::Lax));
-        access.set_secure(*ENVIRONMENT == "production");
-
-        access.set_domain(COOKIE_DOMAIN.as_str());
-
-        let mut refresh = Cookie::new("REFRESH", "");
-
-        refresh.set_http_only(true);
-        refresh.set_path("/");
-        refresh.set_expires(OffsetDateTime::UNIX_EPOCH);
-        refresh.set_same_site(Some(SameSite::Lax));
-        refresh.set_secure(*ENVIRONMENT == "production");
-        refresh.set_domain(COOKIE_DOMAIN.as_str());
-
-        cookies.remove(access);
-        cookies.remove(refresh);
-
-        dbg!(&cookies);
+    pub fn refresh_session(cookies: &Cookies, token: String, exp: i64) {
+        cookies.add(ServerCookie::new("ACCESS", &token, exp));
     }
 }

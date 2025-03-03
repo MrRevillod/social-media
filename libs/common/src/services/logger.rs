@@ -62,5 +62,6 @@ impl<B> OnResponse<B> for TraceOnResponse {
             response.status().as_u16(),
             latency.as_millis()
         );
+        println!("");
     }
 }

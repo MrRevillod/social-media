@@ -11,6 +11,10 @@ validator = { version = "0.20.0", features = ["derive"] }
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.138"
 bcrypt = "0.17.0"
-uuid = { version = "1.13.1", features = ["serde", "v4"] }
 tower-cookies = "0.11.0"
 tower-http = { version = "0.6.2", features = ["cors"] }
+tower = { version = "0.5.2", features = ["util"] }
+
+[[test]]
+name = "Auth service - Session controllers"
+path = "session/test.rs"

@@ -5,26 +5,27 @@ use tower_cookies::Cookies;
 use uuid::Uuid;
 
 use common::{
-    http::{
-        codes::{OK, UNAUTHORIZED},
-        AxumResponse,
-    },
     repositories::{session::SessionRepository, user::UserRepository},
     response,
     services::{
         auth::AuthService,
         jwt::{self, Claims},
-        state::AppStateRef,
+        state::AppState,
     },
-    utils::body::JsonValidator,
+    utils::{
+        http::codes::{OK, UNAUTHORIZED},
+        request::{headers::extract_header, validations::JsonValidator},
+        response::AxumResponse,
+        uuid,
+    },
 };
 
 use super::schemas::*;
 
 pub async fn login(
-    State(ctx): State<AppStateRef>,
-    mut cookies: Cookies,
+    State(ctx): State<AppState>,
     headers: HeaderMap,
+    cookies: Cookies,
     JsonValidator(body): JsonValidator<LoginRequest>,
 ) -> AxumResponse {
     let user = UserRepository::find_one(&ctx.prisma, None, Some(&body.email)).await?;
@@ -34,7 +35,10 @@ pub async fn login(
     };
 
     if !user.validated {
-        return response!(401, json!({ "message": "The account is not validated" }));
+        return response!(
+            UNAUTHORIZED,
+            json!({ "message": "The account is not validated" })
+        );
     }
 
     // Compare the req password with the db hashed password
@@ -54,39 +58,77 @@ pub async fn login(
         jwt::sign(refresh_payload, None)?,
     ];
 
-    let client_ip_address = headers
-        .get("X-Real-IP")
-        .and_then(|ip| ip.to_str().ok())
-        .map(String::from);
+    let Some(req_origin) = extract_header("X-Real-IP", &headers) else {
+        return response!(
+            UNAUTHORIZED,
+            json!({ "message": "Fail getting the request origin" })
+        );
+    };
 
-    let client_user_agent = headers
-        .get("User-Agent")
-        .and_then(|ua| ua.to_str().ok())
-        .map(String::from);
+    let req_user_agent = extract_header("User-Agent", &headers);
 
     SessionRepository::create(
         &ctx.prisma,
         &session_id,
         tokens[1].clone(),
         user.id,
-        client_ip_address.clone(),
-        client_user_agent,
+        Some(req_origin),
+        req_user_agent,
         session_exps.refresh,
     )
     .await?;
 
-    AuthService::add_session_cookies(&mut cookies, tokens, session_exps);
+    AuthService::add_session_cookies(&cookies, tokens, session_exps);
 
     response!(OK)
 }
 
 pub async fn logout(
-    State(ctx): State<AppStateRef>,
+    State(ctx): State<AppState>,
     Extension(session_id): Extension<Uuid>,
     cookies: Cookies,
 ) -> AxumResponse {
     SessionRepository::desactivate(&ctx.prisma, session_id).await?;
     AuthService::remove_session_cookies(&cookies);
 
-    response!(OK, json!({ "message": "Logged out" }))
+    response!(OK, json!({ "message": "The session has ended" }))
+}
+
+pub async fn validate_session() -> AxumResponse {
+    response!(OK, json!({ "message": "The session is valid" }))
+}
+
+pub async fn refresh(State(ctx): State<AppState>, cookies: Cookies) -> AxumResponse {
+    let Some(cookie) = cookies.get("REFRESH") else {
+        return response!(UNAUTHORIZED);
+    };
+
+    // Get the claims from the refresh token
+
+    let claims = jwt::verify(&cookie.value().to_string(), None)?;
+
+    let user_id = uuid::parse_str(&claims.user_id)?;
+    let session_id = uuid::parse_str(&claims.session_id)?;
+
+    // if the user or the session doesn't exist, return unauthorized
+
+    if let None = UserRepository::find_by_id(&ctx.prisma, user_id).await? {
+        return response!(UNAUTHORIZED);
+    };
+
+    if let None = SessionRepository::find_by_id(&ctx.prisma, session_id).await? {
+        AuthService::remove_session_cookies(&cookies);
+        return response!(UNAUTHORIZED);
+    };
+
+    // Build a new access token and refresh the session
+
+    let session_exp = AuthService::get_exp_times().access;
+    let new_claims = Claims::new(claims.user_id, claims.session_id, session_exp);
+
+    let new_token = jwt::sign(new_claims, None)?;
+
+    AuthService::refresh_session(&cookies, new_token, session_exp);
+
+    response!(OK, json!({ "message": "The session has been refreshed" }))
 }

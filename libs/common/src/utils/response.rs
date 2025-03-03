@@ -1,48 +1,12 @@
 use axum::{
     extract::rejection::JsonRejection,
-    http::{
-        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, ORIGIN},
-        HeaderName, Method, StatusCode,
-    },
+    http::StatusCode,
     response::{IntoResponse, Response},
 };
 
 use bcrypt::BcryptError;
 use jsonwebtoken::errors::Error as JwtError;
-use lazy_static::lazy_static;
 use serde_json::{json, Value};
-
-#[macro_export]
-macro_rules! response {
-    ($status:expr) => {{
-        let status = ::axum::http::StatusCode::from_u16($status);
-
-        let Ok(status) = status else {
-            panic!("Invalid status code: {}", $status);
-        };
-
-        let json = ::serde_json::json!({ "status": status.to_string() });
-
-        match status.as_u16() {
-            200..=399 => Ok($crate::http::HttpResponse::Custom(status.as_u16(), json)),
-            _ => Err($crate::http::HttpResponse::Custom(status.as_u16(),  json)),
-        }
-
-    }};
-    ($status:expr, $json:expr) => {{
-        let status = ::axum::http::StatusCode::from_u16($status);
-
-        let Ok(status) = status else {
-            panic!("Invalid status code: {}", $status);
-        };
-
-        if status.is_client_error() || status.is_server_error() {
-            Err($crate::http::HttpResponse::Custom(status.as_u16(), $json))
-        } else {
-            Ok($crate::http::HttpResponse::Custom(status.as_u16(), $json))
-        }
-    }};
-}
 
 pub type AxumResponse = Result<HttpResponse, HttpResponse>;
 
@@ -108,25 +72,34 @@ impl From<BcryptError> for HttpResponse {
     }
 }
 
-pub mod codes {
-    pub const OK: u16 = 200;
-    pub const CREATED: u16 = 201;
-    pub const BAD_REQUEST: u16 = 400;
-    pub const UNAUTHORIZED: u16 = 401;
-    pub const FORBIDDEN: u16 = 403;
-    pub const NOT_FOUND: u16 = 404;
-    pub const CONFLICT: u16 = 409;
-    pub const INTERNAL_SERVER_ERROR: u16 = 500;
-}
+#[macro_export]
+macro_rules! response {
+    ($status:expr) => {{
+        let status = ::axum::http::StatusCode::from_u16($status);
 
-lazy_static! {
-    pub static ref ALLOWED_HTTP_HEADERS: Vec<HeaderName> =
-        vec![ORIGIN, AUTHORIZATION, ACCEPT, CONTENT_TYPE];
-    pub static ref ALLOWED_HTTP_METHODS: Vec<Method> = vec![
-        Method::GET,
-        Method::POST,
-        Method::PATCH,
-        Method::PUT,
-        Method::DELETE,
-    ];
+        let Ok(status) = status else {
+            panic!("Invalid status code: {}", $status);
+        };
+
+        let json = ::serde_json::json!({ "status": status.to_string() });
+
+        match status.as_u16() {
+            200..=399 => Ok($crate::utils::response::HttpResponse::Custom(status.as_u16(), json)),
+            _ => Err($crate::utils::response::HttpResponse::Custom(status.as_u16(),  json)),
+        }
+
+    }};
+    ($status:expr, $json:expr) => {{
+        let status = ::axum::http::StatusCode::from_u16($status);
+
+        let Ok(status) = status else {
+            panic!("Invalid status code: {}", $status);
+        };
+
+        if status.is_client_error() || status.is_server_error() {
+            Err($crate::utils::response::HttpResponse::Custom(status.as_u16(), $json))
+        } else {
+            Ok($crate::utils::response::HttpResponse::Custom(status.as_u16(), $json))
+        }
+    }};
 }

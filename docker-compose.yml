@@ -1,59 +1,80 @@
 services:
-  nginx:
-    container_name: nginx
-    image: nginx:alpine
-    volumes:
-      - ./config/nginx.dev.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "80:80"
-    depends_on:
-      - auth
-      - web
-    networks:
-      - my_networks
-
-  web:
+  auth_dev:
+    container_name: auth_dev
     extends:
       file: docker-compose.base.yml
-      service: web
+      service: auth_base
+    build:
+      target: dev
+    env_file:
+      - .env
+    depends_on:
+      - postgres_dev
+
+  web_dev:
+    container_name: web_dev
+    extends:
+      file: docker-compose.base.yml
+      service: web_base
     env_file:
       - .env
     build:
       target: dev
-    networks:
-      - my_networks
     ports:
       - "5173:5173"
 
-  auth:
+  nginx_dev:
+    container_name: nginx_dev
     extends:
       file: docker-compose.base.yml
-      service: auth
-    env_file:
-      - .env
-    build:
-      target: dev
+      service: nginx_base
+    volumes:
+      - ./config/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth_dev
+      - web_dev
+    networks:
+      - my_networks
 
-  postgres:
+  postgres_dev:
+    container_name: postgres_dev
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
     extends:
       file: docker-compose.base.yml
-      service: postgres
+      service: postgres_base
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
     env_file:
       - .env
+    networks:
+      - my_networks
 
-  sqlx_cli:
+  sqlx_cli_dev:
+    container_name: sqlx_cli_dev
     extends:
       file: docker-compose.base.yml
       service: sqlx_cli
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=${POSTGRES_DATABASE_URL}
+    depends_on:
+      postgres_dev:
+        condition: service_healthy
+    networks:
+      - my_networks
 
 networks:
   my_networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
   auth_target:
   cargo_cache:
   sqlx_cli_target:

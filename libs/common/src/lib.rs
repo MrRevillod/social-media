@@ -1,5 +1,4 @@
 pub mod database;
-pub mod http;
 pub mod models;
 pub mod repositories;
 pub mod services;
@@ -29,7 +28,7 @@ pub fn get_env_var(key: &str) -> String {
     env::var(key).expect(&format!("ENV - PANIC - {} env var not found", key))
 }
 
-pub fn check_env_vars() -> () {
+pub fn check_env_vars() {
     let _ = constants::JWT_SECRET;
     let _ = constants::POSTGRES_DATABASE_URL;
     let _ = constants::ACCESS_SESSION_EXP;

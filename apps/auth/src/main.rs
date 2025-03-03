@@ -1,11 +1,11 @@
-use axum::{http::HeaderValue, routing::Router};
+use axum::{http::HeaderValue, Router};
 
 use common::{
     check_env_vars,
     constants::BASE_SERVER_URL,
     database::PostgresClient,
-    http::{ALLOWED_HTTP_HEADERS, ALLOWED_HTTP_METHODS},
     services::{logger::HttpLogger, state::AppState},
+    utils::http::{ALLOWED_HTTP_HEADERS, ALLOWED_HTTP_METHODS},
 };
 
 use tokio::net::TcpListener;
@@ -22,28 +22,27 @@ async fn main() {
     let database = PostgresClient::new().await;
     let app_state = AppState::new(database.clone());
 
-    let users_router = users::router::users_router(app_state.clone());
-    let session_router = session::router::session_router(app_state.clone());
+    let users_router = users::router(app_state.clone());
+    let session_router = session::router(app_state.clone());
 
     let http_logger = HttpLogger::new();
     let cookie_layer = CookieManagerLayer::new();
 
     let cors = CorsLayer::new()
         .allow_credentials(true)
-        .allow_methods(ALLOWED_HTTP_METHODS.clone())
-        .allow_headers(ALLOWED_HTTP_HEADERS.clone())
+        .allow_methods(ALLOWED_HTTP_METHODS.to_owned())
+        .allow_headers(ALLOWED_HTTP_HEADERS.to_owned())
         .allow_origin(BASE_SERVER_URL.parse::<HeaderValue>().unwrap());
 
     let app = Router::new()
         .merge(session_router)
         .merge(users_router)
-        .with_state(app_state)
         .layer(cors)
         .layer(cookie_layer)
         .layer(http_logger.layer);
 
     let listener = TcpListener::bind("0.0.0.0:8000").await.unwrap();
 
-    println!("Listening on port 8000");
+    println!("Auth service listening on port 8000");
     axum::serve(listener, app).await.unwrap();
 }

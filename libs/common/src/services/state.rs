@@ -1,7 +1,4 @@
 use crate::database::PgPoolRef;
-use std::sync::Arc;
-
-pub type AppStateRef = Arc<AppState>;
 
 #[derive(Clone, Debug)]
 pub struct AppState {
@@ -9,7 +6,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(prisma: PgPoolRef) -> AppStateRef {
-        Arc::new(Self { prisma })
+    pub fn new(prisma: PgPoolRef) -> Self {
+        Self { prisma }
     }
 }

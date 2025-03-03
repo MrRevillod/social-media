@@ -1,9 +1,8 @@
+# -----------------------------------------------------------------------
+# BUILDER STAGE ---------------------------------------------------------
+# -----------------------------------------------------------------------
 
-# BUILDER STAGE
-
-FROM rust:1.84-bullseye as builder
-
-RUN cargo install cargo-watch
+FROM rust:1.84-bullseye AS builder
 
 WORKDIR /social-net
 
@@ -23,9 +22,13 @@ RUN rm -rf ./libs
 COPY libs ./libs
 COPY apps ./apps
 
-# DEVELOPMENT STAGE
+# -----------------------------------------------------------------------
+# DEVELOPMENT STAGE -----------------------------------------------------
+# -----------------------------------------------------------------------
 
-FROM rust:1.84-bullseye as dev
+FROM rust:1.84-bullseye AS dev
+
+RUN cargo install cargo-watch
 
 COPY --from=builder /social-net/ /social-net/
 
@@ -35,12 +38,30 @@ EXPOSE 8000
 
 CMD ["cargo", "watch", "-x", "run"]
 
-# PRODUCTION STAGE
+# -----------------------------------------------------------------------
+# TEST STAGE ------------------------------------------------------------
+# -----------------------------------------------------------------------
 
-FROM debian:bullseye-slim as prod
+FROM rust:1.84-bullseye AS test
+
+COPY --from=builder /social-net/ /social-net/
+
+WORKDIR /social-net/apps/auth
+
+EXPOSE 8000
+
+CMD ["cargo", "test"]
+
+# -----------------------------------------------------------------------
+# PRODUCTION STAGE ------------------------------------------------------
+# -----------------------------------------------------------------------
+
+FROM debian:bullseye-slim AS prod
 
 COPY --from=builder /social-net/target/release/auth /usr/local/bin/auth
 
 EXPOSE 8000
 
 CMD ["auth"]
+
+# ----------------------------------------------------------------------

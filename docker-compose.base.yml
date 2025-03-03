@@ -1,6 +1,5 @@
 services:
-  auth:
-    container_name: auth
+  auth_base:
     build:
       context: .
       dockerfile: ./apps/auth/Dockerfile
@@ -13,8 +12,7 @@ services:
     networks:
       - my_networks
 
-  web:
-    container_name: web
+  web_base:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
@@ -23,17 +21,15 @@ services:
     networks:
       - my_networks
 
-  postgres:
-    container_name: postgres
-    image: postgres:15
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
+  nginx_base:
+    image: nginx:alpine
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "80:80"
+    networks:
+      - my_networks
+
+  postgres_base:
+    image: postgres:15
     healthcheck:
       test: [
           "CMD-SHELL",
@@ -48,7 +44,6 @@ services:
       - my_networks
 
   sqlx_cli:
-    container_name: sqlx_cli
     restart: "no"
     build:
       context: .
@@ -57,15 +52,5 @@ services:
       - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
       - sqlx_cli_target:/social-net/target
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      - DATABASE_URL=${POSTGRES_DATABASE_URL}
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        sqlx database create &&
-        sqlx migrate run --source /social-net/libs/sqlx/migrations
     networks:
       - my_networks

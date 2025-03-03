@@ -66,9 +66,9 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "tower",
  "tower-cookies",
  "tower-http",
- "uuid",
  "validator",
 ]
 

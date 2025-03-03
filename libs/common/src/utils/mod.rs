@@ -1,17 +1,20 @@
-pub mod body;
+pub mod cookies;
+pub mod http;
+pub mod request;
+pub mod response;
 
 pub mod uuid {
 
     use serde_json::json;
-    use uuid::{Error, Uuid};
+    pub use uuid::{Error, Uuid};
 
-    use crate::http::HttpResponse;
+    use super::response::HttpResponse;
 
     pub fn generate() -> Uuid {
         Uuid::new_v4()
     }
 
-    pub fn parse(uuid: &str) -> Result<Uuid, Error> {
+    pub fn parse_str(uuid: &str) -> Result<Uuid, Error> {
         Uuid::parse_str(uuid)
     }
 

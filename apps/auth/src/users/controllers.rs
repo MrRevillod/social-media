@@ -1,16 +1,19 @@
 use axum::extract::State;
-use common::http::codes::{CONFLICT, CREATED};
 use serde_json::json;
 
+use common::utils::http::codes::{CONFLICT, CREATED};
+
 use common::{
-    http::AxumResponse, repositories::user::UserRepository, response, services::state::AppStateRef,
-    utils::body::JsonValidator,
+    repositories::user::UserRepository,
+    response,
+    services::state::AppState,
+    utils::{request::validations::JsonValidator, response::AxumResponse},
 };
 
 use super::schemas::RegisterRequest;
 
 pub async fn create(
-    State(ctx): State<AppStateRef>,
+    State(ctx): State<AppState>,
     JsonValidator(body): JsonValidator<RegisterRequest>,
 ) -> AxumResponse {
     let user = UserRepository::find_one(&ctx.prisma, None, Some(&body.email)).await?;
@@ -18,9 +21,6 @@ pub async fn create(
     if user.is_some() {
         return response!(CONFLICT, json!({ "conflicts": vec!["email"] }));
     }
-
-    dbg!(&body);
-    dbg!(&user);
 
     UserRepository::create(
         &ctx.prisma,
