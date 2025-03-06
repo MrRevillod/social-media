@@ -3,7 +3,7 @@
 # COMMON STAGE ----------------------------------------------------------
 # -----------------------------------------------------------------------
 
-FROM rust:1.84-bullseye
+FROM rust:1.84-bullseye AS common
 
 RUN cargo install sqlx-cli --no-default-features --features postgres
 
@@ -27,4 +27,20 @@ RUN echo "alias sqlx-create='sqlx database create'" >> ~/.bashrc && \
 
 # Run init-db.sh and then start a bash shell
 
-CMD ["/bin/bash", "-c", "/social-net/libs/sqlx/init-db.sh && /bin/bash"]
+RUN /social-net/libs/sqlx/init-db.sh
+
+# -----------------------------------------------------------------------
+# SEED STAGE ------------------------------------------------------------
+# -----------------------------------------------------------------------
+
+FROM common AS seed
+
+RUN cargo install cargo-watch
+
+ARG TARGET
+
+ENV TARGET=${TARGET}
+
+WORKDIR /social-net/libs/sqlx
+
+ENTRYPOINT ["sh", "-c", "cargo watch -x 'run -- $TARGET'"]

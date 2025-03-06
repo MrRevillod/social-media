@@ -56,6 +56,10 @@ services:
 
   sqlx_cli_dev:
     container_name: sqlx_cli_dev
+    build:
+      target: seed
+      args:
+        - TARGET=dev
     extends:
       file: docker-compose.base.yml
       service: sqlx_cli

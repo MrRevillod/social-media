@@ -17,9 +17,11 @@ use super::router;
 
 #[cfg(test)]
 async fn app() -> Router {
+    use common::constants::POSTGRES_TEST_DATABASE_URL;
+
     check_env_vars();
 
-    let database = PostgresClient::new().await;
+    let database = PostgresClient::new(&POSTGRES_TEST_DATABASE_URL).await;
     let app_state = AppState::new(Arc::clone(&database));
 
     router(app_state.clone())
@@ -60,7 +62,7 @@ async fn validate_auth_controller(headers: HeaderMap) -> Response {
 #[tokio::test]
 async fn should_login_200() {
     let data = json!({
-        "email": "test@mail.com ",
+        "email": "test@mail.com",
         "password": "!T3st_P4ssw0rd"
     });
 
@@ -78,6 +80,8 @@ async fn should_not_login_400() {
 
     let response = login_controller(data).await;
 
+    dbg!(&response);
+
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 }
 
@@ -89,6 +93,7 @@ async fn should_not_login_401() {
     });
 
     let response = login_controller(data).await;
+    dbg!(&response);
     assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
 }
 

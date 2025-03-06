@@ -1,4 +1,4 @@
 [workspace]
 
 resolver = "2"
-members = ["apps/auth", "libs/common"]
+members = ["apps/auth", "libs/common", "libs/sqlx"]

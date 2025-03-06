@@ -270,7 +270,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "sqlx",
+ "sqlx 0.8.3",
  "tokio",
  "tower-cookies",
  "tower-http",
@@ -1792,6 +1792,16 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
+]
+
+[[package]]
+name = "sqlx"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "sqlx 0.8.3",
+ "tokio",
+ "uuid",
 ]
 
 [[package]]

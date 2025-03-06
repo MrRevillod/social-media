@@ -14,6 +14,8 @@ pub mod constants {
     lazy_static! {
         pub static ref JWT_SECRET: String = get_env_var("JWT_SECRET");
         pub static ref POSTGRES_DATABASE_URL: String = get_env_var("POSTGRES_DATABASE_URL");
+        pub static ref POSTGRES_TEST_DATABASE_URL: String =
+            get_env_var("POSTGRES_TEST_DATABASE_URL");
         pub static ref ACCESS_SESSION_EXP: i64 =
             get_env_var("ACCESS_SESSION_EXP").parse::<i64>().unwrap();
         pub static ref REFRESH_SESSION_EXP: i64 =
@@ -31,6 +33,7 @@ pub fn get_env_var(key: &str) -> String {
 pub fn check_env_vars() {
     let _ = constants::JWT_SECRET;
     let _ = constants::POSTGRES_DATABASE_URL;
+    let _ = constants::POSTGRES_TEST_DATABASE_URL;
     let _ = constants::ACCESS_SESSION_EXP;
     let _ = constants::REFRESH_SESSION_EXP;
     let _ = constants::BASE_SERVER_URL;

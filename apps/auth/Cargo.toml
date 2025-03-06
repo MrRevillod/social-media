@@ -14,7 +14,3 @@ bcrypt = "0.17.0"
 tower-cookies = "0.11.0"
 tower-http = { version = "0.6.2", features = ["cors"] }
 tower = { version = "0.5.2", features = ["util"] }
-
-[[test]]
-name = "Auth service - Session controllers"
-path = "session/test.rs"

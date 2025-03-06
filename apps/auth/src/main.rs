@@ -2,7 +2,7 @@ use axum::{http::HeaderValue, Router};
 
 use common::{
     check_env_vars,
-    constants::BASE_SERVER_URL,
+    constants::{BASE_SERVER_URL, POSTGRES_DATABASE_URL},
     database::PostgresClient,
     services::{logger::HttpLogger, state::AppState},
     utils::http::{ALLOWED_HTTP_HEADERS, ALLOWED_HTTP_METHODS},
@@ -19,7 +19,7 @@ mod users;
 async fn main() {
     check_env_vars();
 
-    let database = PostgresClient::new().await;
+    let database = PostgresClient::new(&POSTGRES_DATABASE_URL).await;
     let app_state = AppState::new(database.clone());
 
     let users_router = users::router(app_state.clone());
