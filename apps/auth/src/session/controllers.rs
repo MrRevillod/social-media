@@ -9,7 +9,7 @@ use common::{
     response,
     services::{
         auth::AuthService,
-        jwt::{self, Claims},
+        jwt::{self, Claims, Secret},
         state::AppState,
     },
     utils::{
@@ -54,8 +54,8 @@ pub async fn login(
     let refresh_payload = Claims::new(user_id, session_id.clone(), session_exps.refresh);
 
     let tokens = vec![
-        jwt::sign(access_payload, None)?,
-        jwt::sign(refresh_payload, None)?,
+        jwt::sign(access_payload, Secret::Default)?,
+        jwt::sign(refresh_payload, Secret::Default)?,
     ];
 
     let Some(req_origin) = extract_header("X-Real-IP", &headers) else {
@@ -105,7 +105,7 @@ pub async fn refresh(State(ctx): State<AppState>, cookies: Cookies) -> AxumRespo
 
     // Get the claims from the refresh token
 
-    let claims = jwt::verify(&cookie.value().to_string(), None)?;
+    let claims = jwt::verify(&cookie.value().to_string(), Secret::Default)?;
 
     let user_id = uuid::parse_str(&claims.user_id)?;
     let session_id = uuid::parse_str(&claims.session_id)?;
@@ -126,9 +126,10 @@ pub async fn refresh(State(ctx): State<AppState>, cookies: Cookies) -> AxumRespo
     let session_exp = AuthService::get_exp_times().access;
     let new_claims = Claims::new(claims.user_id, claims.session_id, session_exp);
 
-    let new_token = jwt::sign(new_claims, None)?;
+    let new_token = jwt::sign(new_claims, Secret::Default)?;
 
     AuthService::refresh_session(&cookies, new_token, session_exp);
 
     response!(OK, json!({ "message": "The session has been refreshed" }))
 }
+

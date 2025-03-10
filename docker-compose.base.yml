@@ -12,6 +12,19 @@ services:
     networks:
       - my_networks
 
+  mailer_base:
+    build:
+      context: .
+      dockerfile: ./apps/mailer/Dockerfile
+    volumes:
+      - ./:/social-net
+      - cargo_cache:/usr/local/cargo/registry
+      - mailer_target:/social-net/target
+    ports:
+      - "8001:8000"
+    networks:
+      - my_networks
+
   web_base:
     build:
       context: .
@@ -52,5 +65,10 @@ services:
       - ./:/social-net
       - cargo_cache:/usr/local/cargo/registry
       - sqlx_cli_target:/social-net/target
+    networks:
+      - my_networks
+
+  rabbitmq_base:
+    image: rabbitmq:latest
     networks:
       - my_networks

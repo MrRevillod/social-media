@@ -17,7 +17,7 @@ use crate::{
 };
 
 use super::{
-    jwt::{self, Claims},
+    jwt::{self, Claims, Secret},
     state::AppState,
 };
 
@@ -30,6 +30,7 @@ pub struct ExpirationTimes {
 pub struct AuthService {}
 
 impl AuthService {
+
     pub async fn authenticate(
         State(ctx): State<AppState>,
         cookies: Cookies,
@@ -40,7 +41,7 @@ impl AuthService {
             return Err(HttpResponse::UNAUTHORIZED);
         };
 
-        let claims = jwt::verify(&cookie.value().to_string(), None)?;
+        let claims = jwt::verify(&cookie.value().to_string(), Secret::Default)?;
 
         let user_id = uuid::parse_str(&claims.user_id)?;
         let session_id = uuid::parse_str(&claims.session_id)?;

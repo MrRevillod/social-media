@@ -1,15 +1,15 @@
-import { api } from "@/lib/axios"
-import { SignInSchema, SignUpSchema } from "./schemas"
+import { LoginSchema } from "./schemas"
+import { api, protectedApi } from "@/lib/axios"
 import { ApiResponse, User } from "@/lib/types"
 
-export const logIn = async (body: SignInSchema): Promise<ApiResponse<User>> => {
+export const logIn = async (body: LoginSchema): Promise<ApiResponse<User>> => {
 	return api.post<ApiResponse<User>>("/auth/login", body).then(res => res.data)
 }
 
 export const logOut = async (): Promise<ApiResponse<null>> => {
-	return api.post<ApiResponse<null>>("/auth/logout").then(res => res.data)
+	return protectedApi.post<ApiResponse<null>>("/auth/logout").then(res => res.data)
 }
 
-export const signUp = async (body: SignUpSchema): Promise<ApiResponse<null>> => {
-	return api.post<ApiResponse<null>>("/auth/signup", body).then(res => res.data)
+export const validateSession = async (): Promise<ApiResponse<User>> => {
+	return api.post<ApiResponse<User>>("/auth/validate-session").then(res => res.data)
 }

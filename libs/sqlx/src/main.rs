@@ -38,6 +38,11 @@ async fn main() {
 }
 
 async fn dev_seed(pg_pool: PgPoolRef) {
+    sqlx::query("DELETE FROM sessions")
+        .execute(pg_pool.as_ref())
+        .await
+        .unwrap();
+    
     sqlx::query("DELETE FROM users")
         .execute(pg_pool.as_ref())
         .await
@@ -47,7 +52,7 @@ async fn dev_seed(pg_pool: PgPoolRef) {
         &pg_pool,
         String::from("test_username"),
         String::from("test@mail.com"),
-        String::from("!T3st_P4ssw0rd"),
+        bcrypt::hash(String::from("!T3st_P4ssw0rd"), 10).unwrap(),
     )
     .await;
 
@@ -55,15 +60,25 @@ async fn dev_seed(pg_pool: PgPoolRef) {
         &pg_pool,
         String::from("test_username2"),
         String::from("lr@dev.com"),
-        String::from("!abc1234ABC"),
+        bcrypt::hash(String::from("!abc1234ABC"), 10).unwrap(),
     )
     .await;
+
+    sqlx::query("UPDATE users SET validated = true")
+        .execute(pg_pool.as_ref())
+        .await
+        .unwrap();
 }
 
 async fn test_seed(pg_pool: PgPoolRef) {
     let username = String::from("test_username");
     let email = String::from("test@mail.com");
-    let password = String::from("!T3st_P4ssw0rd");
+    let password = bcrypt::hash(String::from("!T3st_P4ssw0rd"), 10).unwrap();
+
+    sqlx::query("DELETE FROM sessions")
+        .execute(pg_pool.as_ref())
+        .await
+        .unwrap();
 
     sqlx::query("DELETE FROM users")
         .execute(pg_pool.as_ref())
@@ -71,4 +86,9 @@ async fn test_seed(pg_pool: PgPoolRef) {
         .unwrap();
 
     let _ = UserRepository::create(&pg_pool, username, email, password).await;
+
+    sqlx::query("UPDATE users SET validated = true")
+        .execute(pg_pool.as_ref())
+        .await
+        .unwrap();
 }

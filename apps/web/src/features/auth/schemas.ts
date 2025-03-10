@@ -1,38 +1,17 @@
 import { z } from "zod"
-import { emailSchema, passwordSchema } from "../../lib/schemas/rules.schemas"
+import { emailSchema } from "@/lib/schemas/rules.schemas"
 
 // Login schemas -----
 
-export const signInSchema = z.object({
+export const loginSchema = z.object({
 	email: emailSchema,
 	password: z.string().min(1, { message: "Password is required" }).max(100, { message: "Password is too long" }),
 })
 
-export const signInDefaultValues = {
+export const loginDefaultValues = {
 	email: "",
 	password: "",
 }
 
-export type SignInSchema = z.infer<typeof signInSchema>
+export type LoginSchema = z.infer<typeof loginSchema>
 
-// Signup schemas -----
-
-export const signUpSchema = z
-	.object({
-		username: z.string().min(1, { message: "Username is required" }).max(50, { message: "Username is too long" }),
-		email: emailSchema,
-		password: passwordSchema,
-		confirmPassword: passwordSchema,
-	})
-	.refine(data => data.password === data.confirmPassword, {
-		message: "Passwords do not match",
-	})
-
-export const signUpDefaultValues = {
-	username: "",
-	email: "",
-	password: "",
-	confirmPassword: "",
-}
-
-export type SignUpSchema = z.infer<typeof signUpSchema>

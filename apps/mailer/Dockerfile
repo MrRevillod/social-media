@@ -18,7 +18,7 @@ RUN mkdir -p ./apps/mailer/src && echo 'fn main() {}' > ./apps/mailer/src/main.r
 RUN mkdir -p ./libs/common/src && echo 'fn main() {}' > ./libs/common/src/lib.rs
 RUN mkdir -p ./libs/sqlx/src && echo 'fn main() {}' > ./libs/sqlx/src/lib.rs
 
-RUN cargo build --release -p auth
+RUN cargo build --release -p mailer
 
 RUN rm -rf ./apps
 RUN rm -rf ./libs
@@ -36,7 +36,7 @@ RUN cargo install cargo-watch
 
 COPY --from=builder /social-net/ /social-net/
 
-WORKDIR /social-net/apps/auth
+WORKDIR /social-net/apps/mailer
 
 EXPOSE 8000
 
@@ -50,7 +50,7 @@ FROM rust:1.84-bullseye AS test
 
 COPY --from=builder /social-net/ /social-net/
 
-WORKDIR /social-net/apps/auth
+WORKDIR /social-net/apps/mailer
 
 EXPOSE 8000
 
@@ -62,10 +62,10 @@ CMD ["cargo", "test"]
 
 FROM debian:bullseye-slim AS prod
 
-COPY --from=builder /social-net/target/release/auth /usr/local/bin/auth
+COPY --from=builder /social-net/target/release/mailer /usr/local/bin/mailer
 
 EXPOSE 8000
 
-CMD ["auth"]
+CMD ["mailer"]
 
 # ----------------------------------------------------------------------

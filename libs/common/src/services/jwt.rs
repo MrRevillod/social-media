@@ -1,4 +1,9 @@
-use jsonwebtoken::{errors::Error as JwtError, DecodingKey, EncodingKey, Header};
+use chrono::Utc;
+use jsonwebtoken::{
+    errors::{Error as JwtError, ErrorKind as JwtErrorKind},
+    DecodingKey, EncodingKey, Header,
+};
+
 use serde::{Deserialize, Serialize};
 
 use crate::constants::JWT_SECRET;
@@ -29,8 +34,17 @@ impl Claims {
     }
 }
 
-pub fn build_secret(key: Option<String>) -> Vec<u8> {
-    key.unwrap_or(JWT_SECRET.to_string()).as_bytes().to_vec()
+#[derive(Debug)]
+pub enum Secret {
+    Key(String),
+    Default,
+}
+
+pub fn build_secret(secret: Secret) -> Vec<u8> {
+    match secret {
+        Secret::Key(key) => key.as_bytes().to_vec(),
+        Secret::Default => JWT_SECRET.as_bytes().to_vec(),
+    }
 }
 
 /// ## Sign jsonwebtoken function
@@ -39,11 +53,11 @@ pub fn build_secret(key: Option<String>) -> Vec<u8> {
 /// if the key is not provided, it will use the default JWT_SECRET
 /// Otherwise, it will use the provided key
 
-pub fn sign(payload: Claims, key: Option<String>) -> Result<String, JwtError> {
+pub fn sign(payload: Claims, secret: Secret) -> Result<String, JwtError> {
     jsonwebtoken::encode(
         &Header::default(),
         &payload,
-        &EncodingKey::from_secret(&build_secret(key)),
+        &EncodingKey::from_secret(&build_secret(secret)),
     )
 }
 
@@ -54,14 +68,20 @@ pub fn sign(payload: Claims, key: Option<String>) -> Result<String, JwtError> {
 ///
 /// ### Returns
 ///
-/// It returns the JWT payload if the token is valid
+/// It returns the JWT payload if the token is valid and not expired
 /// Otherwise, it returns an error (JwtError)
 
-pub fn verify(token: &String, key: Option<String>) -> Result<Claims, JwtError> {
-    jsonwebtoken::decode::<Claims>(
+pub fn verify(token: &String, secret: Secret) -> Result<Claims, JwtError> {
+    let claims = jsonwebtoken::decode::<Claims>(
         &token,
-        &DecodingKey::from_secret(&build_secret(key)),
+        &DecodingKey::from_secret(&build_secret(secret)),
         &jsonwebtoken::Validation::default(),
     )
-    .map(|data| data.claims)
+    .map(|data| data.claims)?;
+
+    if claims.exp < Utc::now().timestamp() {
+        return Err(JwtError::from(JwtErrorKind::ExpiredSignature));
+    }
+
+    Ok(claims)
 }
