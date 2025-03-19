@@ -1,9 +1,6 @@
 pub mod controllers;
 pub mod schemas;
 
-#[cfg(test)]
-pub mod test;
-
 use axum::{middleware::from_fn_with_state as mw, routing::post, Router};
 use common::services::{auth::AuthService, state::AppState};
 

@@ -23,26 +23,40 @@ pub mod constants {
     use lazy_static::lazy_static;
 
     lazy_static! {
-        pub static ref JWT_SECRET: String = get_env_var("JWT_SECRET");
+
+        // Database variables
 
         pub static ref POSTGRES_DATABASE_URL: String = get_env_var("POSTGRES_DATABASE_URL");
         pub static ref POSTGRES_TEST_DATABASE_URL: String =
             get_env_var("POSTGRES_TEST_DATABASE_URL");
 
+        // Session and jwt variables
+
+        pub static ref JWT_SECRET: String = get_env_var("JWT_SECRET");
         pub static ref ACCESS_SESSION_EXP: i64 =
             get_env_var("ACCESS_SESSION_EXP").parse::<i64>().unwrap();
         pub static ref REFRESH_SESSION_EXP: i64 =
             get_env_var("REFRESH_SESSION_EXP").parse::<i64>().unwrap();
 
-        pub static ref BASE_SERVER_URL: String = get_env_var("BASE_SERVER_URL");
+        // Server variables
 
+        pub static ref BASE_SERVER_URL: String = get_env_var("BASE_SERVER_URL");
         pub static ref ENVIRONMENT: String = get_env_var("ENVIRONMENT");
         pub static ref COOKIE_DOMAIN: String = get_env_var("COOKIE_DOMAIN");
+
+        // Project email variables
 
         pub static ref PROJECT_EMAIL_ADDRESS: String = get_env_var("PROJECT_EMAIL_ADDRESS");
         pub static ref PROJECT_EMAIL_PASSWORD: String = get_env_var("PROJECT_EMAIL_PASSWORD");
         pub static ref PROJECT_EMAIL_SMTP_SERVER: String = get_env_var("PROJECT_EMAIL_SMTP_SERVER");
         pub static ref PROJECT_EMAIL_SMTP_PORT: String = get_env_var("PROJECT_EMAIL_SMTP_PORT");
+
+        // RabbitMQ variables
+
+        pub static ref RABBITMQ_ADDR: String = get_env_var("RABBITMQ_ADDR");
+        pub static ref RABBITMQ_EXCHANGE_NAME: String = get_env_var("RABBITMQ_EXCHANGE_NAME");
+        pub static ref RABBITMQ_EMAIL_TOPIC_QUEUE: String = get_env_var("RABBITMQ_EMAIL_TOPIC_QUEUE");
+        pub static ref RABBITMQ_FILE_TOPIC_QUEUE: String = get_env_var("RABBITMQ_FILE_TOPIC_QUEUE");
     }
 }
 

@@ -66,18 +66,18 @@ services:
     networks:
       - my_networks
 
-  rabbitmq_dev:
-    container_name: rabbitmq_dev
-    extends:
-      file: docker-compose.base.yml
-      service: rabbitmq_base
-    ports:
-      - 5672:5672
-      - 15672:15672
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - my_networks
+  # rabbitmq_dev:
+  #   container_name: rabbitmq_dev
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: rabbitmq_base
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+  #   volumes:
+  #     - rabbitmq_data:/var/lib/rabbitmq
+  #   networks:
+  #     - my_networks
 
   sqlx_cli_dev:
     container_name: sqlx_cli_dev
@@ -108,4 +108,4 @@ volumes:
   mailer_target:
   cargo_cache:
   sqlx_cli_target:
-  rabbitmq_data:
+  # rabbitmq_data:

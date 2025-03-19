@@ -3,7 +3,6 @@
 resolver = "2"
 members = [
     "apps/auth", 
-    "apps/mailer", 
     "libs/common", 
-    "libs/sqlx"
+    "libs/sqlx",
 ]

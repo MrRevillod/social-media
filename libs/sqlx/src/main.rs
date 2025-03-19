@@ -30,7 +30,7 @@ async fn main() {
 
     match args.index(1).as_str() {
         "dev" => dev_seed(pg_pool).await,
-        "test" => test_seed(pg_pool).await,
+        // "test" => test_seed(pg_pool).await,
         _ => {
             println!("Invalid mode");
         }
@@ -42,7 +42,7 @@ async fn dev_seed(pg_pool: PgPoolRef) {
         .execute(pg_pool.as_ref())
         .await
         .unwrap();
-    
+
     sqlx::query("DELETE FROM users")
         .execute(pg_pool.as_ref())
         .await
@@ -63,29 +63,6 @@ async fn dev_seed(pg_pool: PgPoolRef) {
         bcrypt::hash(String::from("!abc1234ABC"), 10).unwrap(),
     )
     .await;
-
-    sqlx::query("UPDATE users SET validated = true")
-        .execute(pg_pool.as_ref())
-        .await
-        .unwrap();
-}
-
-async fn test_seed(pg_pool: PgPoolRef) {
-    let username = String::from("test_username");
-    let email = String::from("test@mail.com");
-    let password = bcrypt::hash(String::from("!T3st_P4ssw0rd"), 10).unwrap();
-
-    sqlx::query("DELETE FROM sessions")
-        .execute(pg_pool.as_ref())
-        .await
-        .unwrap();
-
-    sqlx::query("DELETE FROM users")
-        .execute(pg_pool.as_ref())
-        .await
-        .unwrap();
-
-    let _ = UserRepository::create(&pg_pool, username, email, password).await;
 
     sqlx::query("UPDATE users SET validated = true")
         .execute(pg_pool.as_ref())

@@ -20,15 +20,6 @@ RUN echo "alias sqlx-create='sqlx database create'" >> ~/.bashrc && \
     echo "alias sqlx-migrate='sqlx migrate run --source /social-net/libs/sqlx/migrations'" >> ~/.bashrc && \
     echo "source ~/.bashrc" >> ~/.bashrc
 
-# With this we can run the sqlx commands from the container like this:
-
-# docker compose run sqlx_cli_[env] sqlx-create
-# docker compose run sqlx_cli_[env] sqlx-migrate
-
-# Run init-db.sh and then start a bash shell
-
-RUN /social-net/libs/sqlx/init-db.sh
-
 # -----------------------------------------------------------------------
 # SEED STAGE ------------------------------------------------------------
 # -----------------------------------------------------------------------
@@ -43,4 +34,4 @@ ENV TARGET=${TARGET}
 
 WORKDIR /social-net/libs/sqlx
 
-ENTRYPOINT ["sh", "-c", "cargo watch -x 'run -- $TARGET'"]
+ENTRYPOINT ["sh", "-c", "/social-net/libs/sqlx/init-db.sh && cargo watch -x 'run -- $TARGET'"]
